@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Hava Durumu</string>
+    <string name="app_title">Hava Durumu</string>
+    <string name="search_hint">Şehir adı girin</string>
+    <string name="humidity">Nem</string>
+    <string name="wind">Rüzgar</string>
+    <string name="feels_like">Hissedilen</string>
+    <string name="next_5_days">Gelecek 5 Gün</string>
+    <string name="error_prefix">Hata: </string>
+    <string name="location_denied">Konum izni reddedildi</string>
+    <string name="city_empty">Şehir boş</string>
+    <string name="lang_toggle">TR</string>
+</resources>

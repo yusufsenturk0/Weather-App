@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Weather App</string>
+    <string name="app_title">Weather App</string>
+    <string name="search_hint">Enter city name</string>
+    <string name="humidity">Humidity</string>
+    <string name="wind">Wind</string>
+    <string name="feels_like">Feels Like</string>
+    <string name="next_5_days">Next 5 Days</string>
+    <string name="error_prefix">Error: </string>
+    <string name="location_denied">Location permission denied</string>
+    <string name="city_empty">City is empty</string>
+    <string name="lang_toggle">EN</string>
+</resources>
