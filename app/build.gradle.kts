@@ -1,7 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+val apiKey = localProperties.getProperty("API_KEY") ?: ""
 
 android {
     namespace = "com.example.wetherapp"
@@ -15,13 +25,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
-        val localProperties = java.util.Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            localProperties.load(java.io.FileInputStream(localPropertiesFile))
-        }
-        val apiKey = localProperties.getProperty("API_KEY") ?: ""
         buildConfigField("String", "API_KEY", "\"$apiKey\"")
     }
 

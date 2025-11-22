@@ -93,9 +93,8 @@ class WeatherViewModel : ViewModel() {
     private fun filterForecastByDay(list: List<com.example.wetherapp.data.model.ForecastItem>): List<com.example.wetherapp.data.model.ForecastItem> {
         val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
         
-        // Group by day, exclude today
-        return list.filter { !it.dt_txt.startsWith(today) }
-            .groupBy { it.dt_txt.substring(0, 10) }
+        // Group all items by day first
+        val dailyForecasts = list.groupBy { it.dt_txt.substring(0, 10) }
             .map { (_, items) ->
                 // 1. Find the maximum temperature of the day
                 val maxTemp = items.maxOf { it.main.temp }
@@ -108,6 +107,15 @@ class WeatherViewModel : ViewModel() {
                     main = noonItem.main.copy(temp = maxTemp)
                 )
             }
-            .take(5)
+
+        // Try to get 5 days excluding today
+        val nextDays = dailyForecasts.filter { !it.dt_txt.startsWith(today) }
+        
+        return if (nextDays.size >= 5) {
+            nextDays.take(5)
+        } else {
+            // If we don't have 5 future days, include today (or as many as available)
+            dailyForecasts.take(5)
+        }
     }
 }

@@ -159,7 +159,23 @@ class MainActivity : AppCompatActivity() {
         @Suppress("DEPRECATION")
         resources.updateConfiguration(config, resources.displayMetrics)
         
-        recreate()
+        // Update UI text manually to avoid activity restart (which causes crashes/bad UX)
+        updateLocalizedText()
+        
+        // Refresh weather data with new language
+        viewModel.refreshWeather(apiKey)
+    }
+
+    private fun updateLocalizedText() {
+        binding.tvAppTitle.text = getString(R.string.app_title)
+        binding.btnLanguage.text = getString(R.string.lang_toggle)
+        binding.etCity.hint = getString(R.string.search_hint)
+        binding.tvForecastTitle.text = getString(R.string.next_5_days)
+        
+        // Update static labels
+        binding.labelHumidity.text = getString(R.string.humidity)
+        binding.labelWind.text = getString(R.string.wind)
+        binding.labelFeelsLike.text = getString(R.string.feels_like)
     }
 
     private fun handleSearch() {
@@ -172,6 +188,12 @@ class MainActivity : AppCompatActivity() {
             } else {
                 viewModel.getWeatherByCity(inputCity, apiKey)
             }
+            
+            // Clear search bar and hide keyboard
+            binding.etCity.text.clear()
+            val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.hideSoftInputFromWindow(binding.etCity.windowToken, 0)
+            binding.etCity.clearFocus()
         } else {
             android.util.Log.d("MainActivity", "City is empty")
         }
