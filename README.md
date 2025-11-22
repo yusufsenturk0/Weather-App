@@ -36,12 +36,4 @@ A modern, beautiful Android weather application built with Kotlin and MVVM archi
         ```
 4.  Build and run the app!
 
-## Screenshots 📱
 
-| Home Screen | Search | Forecast |
-|:-----------:|:------:|:--------:|
-| *(Add Screenshot)* | *(Add Screenshot)* | *(Add Screenshot)* |
-
-## License 📄
-
-This project is open source and available under the [MIT License](LICENSE).
