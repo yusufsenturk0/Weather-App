@@ -5,11 +5,14 @@ A modern, beautiful Android weather application built with Kotlin and MVVM archi
 ## Features ✨
 
 *   **Real-time Weather**: Get current weather conditions for any city.
+*   **Hourly Forecast**: View detailed 3-hour interval weather data for the current day and future days.
 *   **5-Day Forecast**: Plan ahead with a detailed 5-day weather forecast.
+*   **Interactive Day Selection**: Click on any day in the 5-day forecast to see its specific hourly breakdown.
 *   **Smart Search**: Search for cities with auto-suggestions and error handling.
 *   **Dynamic Backgrounds**: The app interface changes based on the weather (Sunny, Rainy, Snowy, etc.).
+*   **Visual Feedback**: Selected day is highlighted with a stylish border for better UX.
 *   **Multi-Language Support**: Seamlessly switch between English (EN) and Turkish (TR) without restarting the app.
-*   **Location-Based**: Automatically detects your location to show local weather.
+*   **Location-Based**: Automatically detects your location to show local weather (Prioritizes Province/State).
 
 ## Tech Stack 🛠️
 
