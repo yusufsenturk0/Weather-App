@@ -136,7 +136,14 @@ class MainActivity : AppCompatActivity() {
                             }
                         }.start()
                     }
+                } else {
+                    // If location data is not available, use Istanbul as default city
+                    viewModel.getWeatherByCity("Istanbul", apiKey)
                 }
+            }
+            .addOnFailureListener {
+                // Failed to get location, use Istanbul
+                viewModel.getWeatherByCity("Istanbul", apiKey)
             }
     }
 
