@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+
 import com.example.wetherapp.data.model.ForecastItem
 import com.example.wetherapp.databinding.ItemForecastBinding
 import com.example.wetherapp.R
@@ -53,8 +53,7 @@ class ForecastAdapter(private val onDayClick: (ForecastItem) -> Unit) : ListAdap
             
             val iconCode = item.weather.firstOrNull()?.icon
             if (iconCode != null) {
-                val iconUrl = "http://openweathermap.org/img/wn/$iconCode@2x.png"
-                binding.ivForecastIcon.load(iconUrl)
+                binding.ivForecastIcon.setImageResource(com.example.wetherapp.util.WeatherIconMapper.getIconResource(iconCode))
             }
         }
     }

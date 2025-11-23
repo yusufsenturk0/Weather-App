@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+
 import com.example.wetherapp.R
 import com.example.wetherapp.data.model.ForecastItem
 import java.text.SimpleDateFormat
@@ -62,8 +62,7 @@ class HourlyForecastAdapter(private var hourlyList: List<ForecastItem>) :
 
         val iconCode = item.weather.firstOrNull()?.icon
         if (iconCode != null) {
-            val iconUrl = "http://openweathermap.org/img/wn/$iconCode@2x.png"
-            holder.ivWeatherIcon.load(iconUrl)
+            holder.ivWeatherIcon.setImageResource(com.example.wetherapp.util.WeatherIconMapper.getIconResource(iconCode))
         }
     }
 

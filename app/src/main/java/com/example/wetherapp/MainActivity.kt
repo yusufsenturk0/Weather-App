@@ -11,7 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import coil.load
+
 import com.example.wetherapp.databinding.ActivityMainBinding
 import com.example.wetherapp.ui.adapter.ForecastAdapter
 import com.example.wetherapp.ui.HourlyForecastAdapter
@@ -286,10 +286,7 @@ class MainActivity : AppCompatActivity() {
                 
                 val iconCode = weather.weather.firstOrNull()?.icon
                 if (iconCode != null) {
-                    val iconUrl = "http://openweathermap.org/img/wn/$iconCode@4x.png"
-                    binding.ivWeatherIcon.load(iconUrl) {
-                        crossfade(true)
-                    }
+                    binding.ivWeatherIcon.setImageResource(com.example.wetherapp.util.WeatherIconMapper.getIconResource(iconCode))
                     updateBackground(weather.weather.firstOrNull()?.main)
                 }
             }?.onFailure { exception ->
