@@ -48,10 +48,7 @@ class WeatherViewModel : ViewModel() {
                 
                 if (weatherResult.isSuccess) {
                     val forecastResult = repository.getForecast(city, apiKey, lang)
-                    val filteredForecast = forecastResult.map { response ->
-                        response.copy(list = filterForecastByDay(response.list))
-                    }
-                    _forecastResult.value = filteredForecast
+                    _forecastResult.value = forecastResult
                 }
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Exception: ${e.message}", e)
@@ -76,10 +73,7 @@ class WeatherViewModel : ViewModel() {
                     val city = weatherResult.getOrNull()?.name ?: ""
                     if (city.isNotEmpty()) {
                         val forecastResult = repository.getForecast(city, apiKey, lang)
-                        val filteredForecast = forecastResult.map { response ->
-                            response.copy(list = filterForecastByDay(response.list))
-                        }
-                        _forecastResult.value = filteredForecast
+                        _forecastResult.value = forecastResult
                     }
                 }
             } catch (e: Exception) {
@@ -87,35 +81,6 @@ class WeatherViewModel : ViewModel() {
             } finally {
                 _isLoading.value = false
             }
-        }
-    }
-
-    private fun filterForecastByDay(list: List<com.example.wetherapp.data.model.ForecastItem>): List<com.example.wetherapp.data.model.ForecastItem> {
-        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
-        
-        // Group all items by day first
-        val dailyForecasts = list.groupBy { it.dt_txt.substring(0, 10) }
-            .map { (_, items) ->
-                // 1. Find the maximum temperature of the day
-                val maxTemp = items.maxOf { it.main.temp }
-                
-                // 2. Pick the weather condition at noon (12:00) as representative
-                val noonItem = items.minByOrNull { kotlin.math.abs(it.dt_txt.substring(11, 13).toInt() - 12) } ?: items.first()
-                
-                // 3. Create a new item with Max Temp and Noon Weather
-                noonItem.copy(
-                    main = noonItem.main.copy(temp = maxTemp)
-                )
-            }
-
-        // Try to get 5 days excluding today
-        val nextDays = dailyForecasts.filter { !it.dt_txt.startsWith(today) }
-        
-        return if (nextDays.size >= 5) {
-            nextDays.take(5)
-        } else {
-            // If we don't have 5 future days, include today (or as many as available)
-            dailyForecasts.take(5)
         }
     }
 }

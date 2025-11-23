@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.wetherapp.data.model.ForecastItem
 import com.example.wetherapp.databinding.ItemForecastBinding
+import com.example.wetherapp.R
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class ForecastAdapter : ListAdapter<ForecastItem, ForecastAdapter.ForecastViewHolder>(ForecastDiffCallback()) {
+class ForecastAdapter(private val onDayClick: (ForecastItem) -> Unit) : ListAdapter<ForecastItem, ForecastAdapter.ForecastViewHolder>(ForecastDiffCallback()) {
+
+    private var selectedPosition = RecyclerView.NO_POSITION
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastViewHolder {
         val binding = ItemForecastBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -19,7 +22,25 @@ class ForecastAdapter : ListAdapter<ForecastItem, ForecastAdapter.ForecastViewHo
     }
 
     override fun onBindViewHolder(holder: ForecastViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val item = getItem(position)
+        holder.bind(item)
+        
+        val isSelected = position == selectedPosition
+        holder.itemView.setBackgroundResource(if (isSelected) R.drawable.bg_card_selected else R.drawable.bg_card)
+
+        holder.itemView.setOnClickListener {
+            val previousPosition = selectedPosition
+            selectedPosition = holder.adapterPosition
+            notifyItemChanged(previousPosition)
+            notifyItemChanged(selectedPosition)
+            onDayClick(item)
+        }
+    }
+
+    fun clearSelection() {
+        val previousPosition = selectedPosition
+        selectedPosition = RecyclerView.NO_POSITION
+        notifyItemChanged(previousPosition)
     }
 
     class ForecastViewHolder(private val binding: ItemForecastBinding) : RecyclerView.ViewHolder(binding.root) {

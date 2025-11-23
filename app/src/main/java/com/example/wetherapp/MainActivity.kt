@@ -14,8 +14,10 @@ import androidx.core.content.ContextCompat
 import coil.load
 import com.example.wetherapp.databinding.ActivityMainBinding
 import com.example.wetherapp.ui.adapter.ForecastAdapter
+import com.example.wetherapp.ui.HourlyForecastAdapter
 import com.example.wetherapp.ui.viewmodel.WeatherViewModel
 import com.example.wetherapp.data.model.ForecastResponse
+import com.example.wetherapp.data.model.ForecastItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -23,9 +25,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
-    private val forecastAdapter = ForecastAdapter()
+    private lateinit var forecastAdapter: ForecastAdapter
+    private lateinit var hourlyForecastAdapter: HourlyForecastAdapter
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     
+    // Store full forecast data to filter for hourly view
+    private var fullForecastList: List<ForecastItem> = emptyList()
+
     // API Key is now loaded from local.properties via BuildConfig
     private val apiKey = BuildConfig.API_KEY
 
@@ -46,6 +52,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        
+        // Initialize Adapters
+        hourlyForecastAdapter = HourlyForecastAdapter(emptyList())
+        binding.rvHourlyForecast.adapter = hourlyForecastAdapter
+        
+        forecastAdapter = ForecastAdapter { selectedDay ->
+            showDayHourly(selectedDay)
+        }
         binding.rvForecast.adapter = forecastAdapter
 
         setupListeners()
@@ -142,9 +156,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         binding.btnLanguage.setOnClickListener {
             toggleLanguage()
+        }
+        
+        // Reset to current hourly forecast when main card is clicked
+        binding.weatherCard.setOnClickListener {
+            showCurrentHourly()
         }
     }
 
@@ -275,8 +293,99 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.forecastResult.observe(this) { result ->
             result?.onSuccess { forecast ->
-                forecastAdapter.submitList(forecast.list)
+                fullForecastList = forecast.list
+                
+                if (fullForecastList.isNotEmpty()) {
+                    // Get Today's date from the first item
+                    val firstItemDate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                        java.time.LocalDateTime.parse(fullForecastList.first().dt_txt, formatter).toLocalDate().toString()
+                    } else {
+                        fullForecastList.first().dt_txt.substring(0, 10)
+                    }
+
+                    // 1. Update Daily Forecast (Bottom List)
+                    val dailyList = forecast.list
+                        .groupBy { it.dt_txt.substring(0, 10) } // Group by YYYY-MM-DD
+                        .map { entry ->
+                            // For each day, find the item with max temp to represent the day
+                            entry.value.maxByOrNull { it.main.temp } ?: entry.value.first()
+                        }
+                        .filter { 
+                            // Exclude Today
+                            !it.dt_txt.startsWith(firstItemDate)
+                        }
+                        .take(5) // Limit to 5 days
+                    
+                    forecastAdapter.submitList(dailyList)
+                    
+                    // 2. Update Hourly Forecast (Middle List) - Show only Today's remaining hours
+                    showCurrentHourly()
+                }
             }
+        }
+    }
+
+    private fun showCurrentHourly() {
+        if (fullForecastList.isEmpty()) return
+
+        // Highlight Main Card, Clear Adapter Selection
+        binding.weatherCard.setBackgroundResource(R.drawable.bg_card_selected)
+        if (::forecastAdapter.isInitialized) {
+            forecastAdapter.clearSelection()
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            // Get the date of the first item (Today)
+            val todayDate = java.time.LocalDateTime.parse(fullForecastList.first().dt_txt, formatter).toLocalDate()
+            
+            // Filter list to show ONLY items for Today
+            val todayHourlyList = fullForecastList.filter {
+                java.time.LocalDateTime.parse(it.dt_txt, formatter).toLocalDate() == todayDate
+            }
+            hourlyForecastAdapter.updateData(todayHourlyList)
+        } else {
+            // Fallback for older SDKs
+            val todayDateStr = fullForecastList.first().dt_txt.substring(0, 10)
+            val todayHourlyList = fullForecastList.filter { it.dt_txt.startsWith(todayDateStr) }
+            hourlyForecastAdapter.updateData(todayHourlyList)
+        }
+    }
+
+    private fun showDayHourly(dayItem: ForecastItem) {
+        // Un-highlight Main Card
+        binding.weatherCard.setBackgroundResource(R.drawable.bg_card)
+
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                val selectedDateTime = java.time.LocalDateTime.parse(dayItem.dt_txt, formatter)
+                val selectedDate = selectedDateTime.toLocalDate()
+                
+                android.util.Log.d("MainActivity", "Selected Date: $selectedDate")
+                
+                val dayHourlyList = fullForecastList.filter { 
+                    val itemDateTime = java.time.LocalDateTime.parse(it.dt_txt, formatter)
+                    itemDateTime.toLocalDate() == selectedDate
+                }
+                
+                android.util.Log.d("MainActivity", "Filtered List Size: ${dayHourlyList.size}")
+                
+                if (dayHourlyList.isNotEmpty()) {
+                    hourlyForecastAdapter.updateData(dayHourlyList)
+                } else {
+                    showCurrentHourly()
+                }
+            } else {
+                // Fallback for older SDKs
+                val selectedDate = dayItem.dt_txt.split(" ")[0]
+                val dayHourlyList = fullForecastList.filter { it.dt_txt.startsWith(selectedDate) }
+                hourlyForecastAdapter.updateData(dayHourlyList)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showCurrentHourly()
         }
     }
 
