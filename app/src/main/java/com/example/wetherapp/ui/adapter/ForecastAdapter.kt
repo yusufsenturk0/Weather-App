@@ -46,14 +46,14 @@ class ForecastAdapter(private val onDayClick: (ForecastItem) -> Unit) : ListAdap
     class ForecastViewHolder(private val binding: ItemForecastBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ForecastItem) {
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.dt_txt)
-            val dayFormat = SimpleDateFormat("EEEE", Locale.getDefault())
+            val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
             binding.tvDay.text = date?.let { dayFormat.format(it) } ?: item.dt_txt
 
             binding.tvForecastTemp.text = "${item.main.temp.toInt()}°"
             
             val iconCode = item.weather.firstOrNull()?.icon
             if (iconCode != null) {
-                val iconUrl = "https://openweathermap.org/img/wn/$iconCode@2x.png"
+                val iconUrl = "http://openweathermap.org/img/wn/$iconCode@2x.png"
                 binding.ivForecastIcon.load(iconUrl)
             }
         }

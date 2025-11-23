@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity() {
                 
                 val iconCode = weather.weather.firstOrNull()?.icon
                 if (iconCode != null) {
-                    val iconUrl = "https://openweathermap.org/img/wn/$iconCode@4x.png"
+                    val iconUrl = "http://openweathermap.org/img/wn/$iconCode@4x.png"
                     binding.ivWeatherIcon.load(iconUrl) {
                         crossfade(true)
                     }

@@ -62,7 +62,7 @@ class HourlyForecastAdapter(private var hourlyList: List<ForecastItem>) :
 
         val iconCode = item.weather.firstOrNull()?.icon
         if (iconCode != null) {
-            val iconUrl = "https://openweathermap.org/img/wn/$iconCode@2x.png"
+            val iconUrl = "http://openweathermap.org/img/wn/$iconCode@2x.png"
             holder.ivWeatherIcon.load(iconUrl)
         }
     }
