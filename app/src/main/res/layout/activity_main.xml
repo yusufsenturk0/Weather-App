@@ -117,6 +117,22 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="London" />
 
+                <ImageButton
+                    android:id="@+id/btnUseLocation"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_mylocation"
+                    app:tint="#FFFFFF"
+                    android:padding="12dp"
+                    android:contentDescription="@string/use_current_location"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/ivWeatherIcon"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"/>
+
                 <ImageView
                     android:id="@+id/ivWeatherIcon"
                     android:layout_width="100dp"
@@ -286,4 +302,12 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <include
+        android:id="@+id/layoutError"
+        layout="@layout/layout_error_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

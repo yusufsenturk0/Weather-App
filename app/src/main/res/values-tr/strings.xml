@@ -10,4 +10,9 @@
     <string name="location_denied">Konum izni reddedildi</string>
     <string name="city_empty">Şehir boş</string>
     <string name="lang_toggle">TR</string>
+    <string name="use_current_location">Mevcut Konumu Kullan</string>
+    <string name="error_no_internet_title">İnternet Bağlantısı Yok</string>
+    <string name="error_no_internet_msg">Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.</string>
+    <string name="retry">Tekrar Dene</string>
+    <string name="city_not_found">Şehir bulunamadı. Lütfen yazımı kontrol edin.</string>
 </resources>

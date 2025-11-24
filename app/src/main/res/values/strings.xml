@@ -10,4 +10,9 @@
     <string name="location_denied">Location permission denied</string>
     <string name="city_empty">City is empty</string>
     <string name="lang_toggle">EN</string>
+    <string name="use_current_location">Use Current Location</string>
+    <string name="error_no_internet_title">No Internet Connection</string>
+    <string name="error_no_internet_msg">Please check your internet connection and try again.</string>
+    <string name="retry">Retry</string>
+    <string name="city_not_found">City not found. Please check the spelling.</string>
 </resources>

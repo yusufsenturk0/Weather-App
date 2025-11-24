@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -40,9 +43,12 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
+                binding.btnUseLocation.visibility = View.GONE
                 getCurrentLocation()
             } else {
+                binding.btnUseLocation.visibility = View.VISIBLE
                 Toast.makeText(this, getString(R.string.location_denied), Toast.LENGTH_SHORT).show()
+                viewModel.getWeatherByCity("Istanbul", apiKey)
             }
         }
 
@@ -78,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
+            binding.btnUseLocation.visibility = View.GONE
             getCurrentLocation()
         } else {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -170,6 +177,29 @@ class MainActivity : AppCompatActivity() {
         // Reset to current hourly forecast when main card is clicked
         binding.weatherCard.setOnClickListener {
             showCurrentHourly()
+        }
+
+        // Location Button Listener
+        binding.btnUseLocation.setOnClickListener {
+            checkLocationPermission()
+        }
+
+        // Retry Button Listener
+        binding.layoutError.btnRetry.setOnClickListener {
+            retryLastAction()
+        }
+    }
+
+    private fun retryLastAction() {
+        // Don't hide the error layout, just switch to loading state within it
+        binding.layoutError.btnRetry.visibility = View.GONE
+        binding.layoutError.progressBarError.visibility = View.VISIBLE
+        
+        val currentCity = binding.tvCityName.text.toString()
+        if (currentCity.isNotEmpty() && currentCity != "City Name") {
+             viewModel.getWeatherByCity(currentCity, apiKey)
+        } else {
+            checkLocationPermission()
         }
     }
 
@@ -269,12 +299,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.isLoading.observe(this) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            binding.tvError.visibility = View.GONE
+            // If we are already in error state (retry clicked), don't show main progress bar
+            if (binding.layoutError.root.visibility != View.VISIBLE) {
+                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            }
+            
+            if (isLoading) {
+                binding.tvError.visibility = View.GONE
+                // Do NOT hide layoutError here to prevent flickering
+            }
         }
 
         viewModel.weatherResult.observe(this) { result ->
             result?.onSuccess { weather ->
+                binding.layoutError.root.visibility = View.GONE
+                binding.layoutError.progressBarError.visibility = View.GONE
+                binding.layoutError.btnRetry.visibility = View.VISIBLE
+                
                 binding.tvCityName.text = weather.name.replace(" Province", "").replace(" City", "")
                 binding.tvTemperature.text = "${weather.main.temp.toInt()}°"
                 binding.tvDescription.text = weather.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: ""
@@ -290,8 +331,20 @@ class MainActivity : AppCompatActivity() {
                     updateBackground(weather.weather.firstOrNull()?.main)
                 }
             }?.onFailure { exception ->
-                binding.tvError.text = "${getString(R.string.error_prefix)}${exception.message}"
-                binding.tvError.visibility = View.VISIBLE
+                if (isNetworkAvailable()) {
+                    // Hata mesajını Toast olarak göster
+                    val errorMessage = if (exception.message?.contains("404") == true) {
+                        getString(R.string.city_not_found)
+                    } else {
+                        "${getString(R.string.error_prefix)}${exception.message}"
+                    }
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+
+                    // Also hide error layout if it was visible (e.g. came from retry)
+                    binding.layoutError.root.visibility = View.GONE
+                } else {
+                    showNetworkError()
+                }
             }
         }
 
@@ -328,6 +381,26 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
+        }
+    }
+
+    private fun showNetworkError() {
+        binding.layoutError.root.visibility = View.VISIBLE
+        binding.layoutError.progressBarError.visibility = View.GONE
+        binding.layoutError.btnRetry.visibility = View.VISIBLE
+        binding.layoutError.tvErrorTitle.text = getString(R.string.error_no_internet_title)
+        binding.layoutError.tvErrorMessage.text = getString(R.string.error_no_internet_msg)
     }
 
     private fun showCurrentHourly() {
