@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
                 getCurrentLocation()
             } else {
                 binding.btnUseLocation.visibility = View.VISIBLE
-                Toast.makeText(this, getString(R.string.location_denied), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.location_denied), Toast.LENGTH_SHORT).show()
                 viewModel.getWeatherByCity("Istanbul", apiKey)
             }
         }
@@ -66,6 +66,9 @@ class MainActivity : AppCompatActivity() {
         // Load Ad
         val adRequest = AdRequest.Builder().build()
         binding.adView.loadAd(adRequest)
+        
+        // Check if we should show "Rate Me" dialog
+        RateManager.checkRateApp(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         
