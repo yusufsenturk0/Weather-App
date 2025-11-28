@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
+
 import com.example.wetherapp.databinding.ActivityMainBinding
 import com.example.wetherapp.ui.adapter.ForecastAdapter
 import com.example.wetherapp.ui.HourlyForecastAdapter
@@ -23,6 +24,8 @@ import com.example.wetherapp.data.model.ForecastResponse
 import com.example.wetherapp.data.model.ForecastItem
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.AdRequest
 
 class MainActivity : AppCompatActivity() {
 
@@ -57,12 +60,19 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this) {}
+
+        // Load Ad
+        val adRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         
         // Initialize Adapters
         hourlyForecastAdapter = HourlyForecastAdapter(emptyList())
         binding.rvHourlyForecast.adapter = hourlyForecastAdapter
-        
+
         forecastAdapter = ForecastAdapter { selectedDay ->
             showDayHourly(selectedDay)
         }
